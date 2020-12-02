@@ -1,0 +1,132 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
+
+int main(int argc, char *argv[])
+{
+    ros::init(argc, argv, "turtle");
+
+    ros::NodeHandle n;
+    ros::Publisher cmd_vel_pub = n.advertise<geometry_msgs::Twist>("turtle1/cmd_vel", 1);
+    
+    geometry_msgs::Twist cmd_vel_message_med;
+    cmd_vel_message_med.angular.z = -1.0;
+    cmd_vel_message_med.linear.x = 0.0;
+    
+    geometry_msgs::Twist cmd_vel_message_mod;
+    cmd_vel_message_mod.angular.z = 1.0;
+    cmd_vel_message_mod.linear.x = 0.0;
+
+    geometry_msgs::Twist cmd_vel_message_frem;
+    cmd_vel_message_frem.angular.z = 0.0;
+    cmd_vel_message_frem.linear.x = 2.0;
+
+    geometry_msgs::Twist cmd_vel_message_tilbage;
+    cmd_vel_message_tilbage.angular.z = 0.0;
+    cmd_vel_message_tilbage.linear.x = -2.0;
+
+    int i = 0;
+    bool bumper = false, first = true;
+    
+    ros::Rate loop_rate(1);
+    while (ros::ok && i != 10)
+    {
+    std::cout << "Move forwards = 0 and collision with obstacle = 1; ";
+        
+        if (bumper == false)
+        {
+            cmd_vel_pub.publish(cmd_vel_message_frem);
+            ros::Duration(1).sleep();
+            std::cout << "\nDistance nået " << i << " rep.\n";
+            std::cin >> bumper;
+            
+            if (first)
+            {
+                i++;
+            }
+        }
+
+        else
+        {
+            int z = 1, x = 1, c = 1, v = 1;
+            if (first)
+            {
+                
+                i = i - 1;
+                std::cout << "\nBrugbar længde af strækningen; " << i << " rep.\n";
+                first = false;
+            }
+
+            while (z == 1)
+            {
+                z++;
+                cmd_vel_pub.publish(cmd_vel_message_tilbage);
+                ros::Duration(1).sleep();
+            }
+            
+            while (x == 1)
+            {        
+                x++;
+                cmd_vel_pub.publish(cmd_vel_message_mod);
+                ros::Duration(1).sleep();
+            }
+            
+            while (c == 1)
+            {
+                c++;
+                cmd_vel_pub.publish(cmd_vel_message_frem);
+                ros::Duration(1).sleep();
+            }
+            
+            while (v == 1)
+            {
+                v++;
+                cmd_vel_pub.publish(cmd_vel_message_mod);
+                ros::Duration(1).sleep();
+                std::cin >> bumper;
+            }
+
+        
+
+           
+           
+            /*while (z < 5)
+            {  
+                z++;
+
+                if (z = 1)
+                {
+                    cmd_vel_pub.publish(cmd_vel_message_tilbage);
+                    ros::Duration(1).sleep();
+                }
+                else if (z = 2)
+                {
+                    
+                    cmd_vel_pub.publish(cmd_vel_message_mod);
+                    ros::Duration(1).sleep();
+                }
+                else if (z = 3)
+                {
+                    cmd_vel_pub.publish(cmd_vel_message_frem);
+                    ros::Duration(1).sleep();
+                }
+                else if (z = 4)
+                {
+                    cmd_vel_pub.publish(cmd_vel_message_mod);
+                    ros::Duration(1).sleep();
+                }
+                
+            }  
+            */
+          
+        }
+     
+    }
+
+
+
+    return 0;
+}
+
