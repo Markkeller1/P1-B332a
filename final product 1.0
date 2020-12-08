@@ -13,14 +13,12 @@
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
-bool brak_now = false;
 ros::Subscriber sub_bumper;
 
 void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 {
     if (msg->state == kobuki_msgs::BumperEvent::PRESSED)
     {
-        brak_now = true;
         ros::Duration(0.5).sleep();
 
         ros::NodeHandle n;
@@ -34,38 +32,76 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
             for (int z = 0; z < 1; z++)
             {
                 geometry_msgs::Twist msg;
-                msg.linear.x = -0.5;
+                msg.linear.x = -0.7;
                 msg.angular.z = 0;
                 pub_twist.publish(msg);
-                ros::Duration(1.5).sleep();
+                ros::Duration(2).sleep();
             }
-            
+
             for (int x = 0; x < 1; x++)
             {        
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = 2;
+                msg.angular.z = 2.5;
                 pub_twist.publish(msg);
-                ros::Duration(3).sleep();
+                ros::Duration(2).sleep();
             }
             
             for (int c = 0; c < 1; c++)
             {
                 geometry_msgs::Twist msg;
-                msg.linear.x = 2;
+                msg.linear.x = 0.7;
                 msg.angular.z = 0;
                 pub_twist.publish(msg);
-                ros::Duration(1.5).sleep();
+                ros::Duration(2).sleep();
             }
             
             for (int v = 0; v < 1; v++)
             {
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = 2;
+                msg.angular.z = 2.5;
                 pub_twist.publish(msg);
-                ros::Duration(3).sleep();
+                ros::Duration(2).sleep();
             }
+            
+            /*
+            for (int z; z < 1; z++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = -1;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+                ros::Duration(2).sleep();
+            }
+
+            for (int x = 0; x < 1; x++)
+            {        
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = -2.5;
+                pub_twist.publish(msg);
+                ros::Duration(2).sleep();
+            }
+            
+            for (int c = 0; c < 2; c++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 1;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+                ros::Duration(2).sleep();
+            }
+            
+            for (int v = 0; v < 1; v++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = -2.5;
+                pub_twist.publish(msg);
+                ros::Duration(2).sleep();
+            }
+            */
         }
 
         else if (msg->bumper == 0)
@@ -96,13 +132,12 @@ int main(int argc, char **argv)
     for (int i = 1; i > 0; i++)
     {
         geometry_msgs::Twist msg;
-        msg.linear.x = 0.3;
+        msg.linear.x = 0.7;
         msg.angular.z = 0;
         pub_twist.publish(msg);
         ros::Duration(0.5).sleep();
         ros::spinOnce();
     }
 
-    ros::spin();
     return 0;
 }
