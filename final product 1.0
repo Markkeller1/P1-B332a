@@ -17,17 +17,28 @@ ros::Subscriber sub_bumper;
 ros::Publisher pub_twist;
 ros::Publisher pub_accl;
 
-bool flag = true;
+int dist = 0, total_dist;
+bool flag = true, f = true;
 
 void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 {
-    if (msg->state == kobuki_msgs::BumperEvent::PRESSED)
+    ROS_INFO ("Hej");
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED || dist == total_dist)
     {
         ros::Duration(0.5).sleep();
         
-        if (msg->bumper == 1)
+        if (msg->bumper == 1 || total_dist == dist)
         {
             ROS_INFO("Center bumper activated!");
+            if (f)
+            {
+                f = !f;
+                dist--;
+                total_dist = dist;
+            }
+
+            dist = 0;
+
             if (flag)
             {
                 for (int i = 0; i < 2; i++)
@@ -45,14 +56,14 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {        
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = 1.58;
+                    msg.angular.z = 1.50;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0.5;
@@ -67,7 +78,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = 1.58;
+                    msg.angular.z = 1.50;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                 }
@@ -94,14 +105,14 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {        
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = -1.58;
+                    msg.angular.z = -1.50;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0.5;
@@ -116,10 +127,12 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = -1.58;
+                    msg.angular.z = -1.50;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                 }
+
+                ros::Duration(1).sleep();
                 flag = !flag;
             }
 
@@ -151,12 +164,14 @@ int main(int argc, char **argv)
     pub_twist = n.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000);
     pub_accl = n.advertise<geometry_msgs::Accel>("/cmd_vel_mux/input/teleop", 1000);
     
-    for (int i = 1; ros::ok && i > 0; i++)
+    for (int ever = 1; ros::ok && ever > 0; ever++)
     {
+        dist++;
         geometry_msgs::Twist msg;
         msg.linear.x = 0.5;
         msg.angular.z = 0;
         pub_twist.publish(msg);
+        std::cout << dist << " " << total_dist << std::endl;
         ros::Duration(0.5).sleep();
         ros::spinOnce();
     }
