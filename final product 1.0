@@ -73,13 +73,13 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 }
                 
                 ros::Duration(1).sleep();                
-                bool first = false;
+                first = false;
             }
             
             else
             {
                 //the other way
-                bool first = ture;
+                first = ture;
             }
 
 
