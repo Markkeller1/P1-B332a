@@ -20,20 +20,121 @@ ros::Publisher pub_accl;
 int dist = 0, total_dist;
 bool flag = true, f = true;
 
+
+
+
+
+
+
+void route_bot()
+{
+ ros::Duration(1).sleep();
+        
+    if (total_dist == dist)
+    {
+        ROS_INFO("God ide Simon.");
+
+        dist = 0;
+
+        if (flag)
+        {
+            for (int i = 0; i < 3; i++)
+            {        
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = 1.4;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 2; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0.5;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 3; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = 1.4;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+            
+            ros::Duration(1).sleep();
+            flag = !flag;
+        }
+        
+        else
+        {
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 3; i++)
+            {        
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = -1.4;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 2; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0.5;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 3; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = -1.4;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+            flag = !flag;
+        }
+    }   
+}
+
+
+
+
+
+
+
+
 void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 {
-    ROS_INFO ("Hej");
-    if (msg->state == kobuki_msgs::BumperEvent::PRESSED || dist == total_dist)
+    ROS_INFO ("Detter er clbk_bumper");
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED)
     {
-        ros::Duration(0.5).sleep();
+        ros::Duration(1).sleep();
         
-        if (msg->bumper == 1 || total_dist == dist)
+        if (msg->bumper < 3)
         {
             ROS_INFO("Center bumper activated!");
             if (f)
             {
                 f = !f;
-                dist--;
+                dist = dist -6;
                 total_dist = dist;
             }
 
@@ -52,13 +153,16 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {        
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = 1.50;
+                    msg.angular.z = 1.5;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
+                    pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
@@ -74,13 +178,16 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = 1.50;
+                    msg.angular.z = 1.5;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
+                    pub_twist.publish(msg);
                 }
                 
                 ros::Duration(1).sleep();
@@ -101,11 +208,11 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {        
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = -1.50;
+                    msg.angular.z = -1.4;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                 }
@@ -123,11 +230,11 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = -1.50;
+                    msg.angular.z = -1.4;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                 }
@@ -135,8 +242,6 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 ros::Duration(1).sleep();
                 flag = !flag;
             }
-
-
         }
 
         else if (msg->bumper == 0)
@@ -168,12 +273,17 @@ int main(int argc, char **argv)
     {
         dist++;
         geometry_msgs::Twist msg;
-        msg.linear.x = 0.5;
+        msg.linear.x = 0.3;
         msg.angular.z = 0;
         pub_twist.publish(msg);
         std::cout << dist << " " << total_dist << std::endl;
-        ros::Duration(0.5).sleep();
+        ros::Duration(0.5).sleep();       
         ros::spinOnce();
+        if (total_dist == dist)
+        {
+            std::cout << "For langt... STOP!!" << std::endl;
+            route_bot();
+        }
     }
 
     return 0;
