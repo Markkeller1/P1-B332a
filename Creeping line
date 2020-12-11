@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     
     ros::Duration(3).sleep();
 
-    while (ros::ok)
+    while (ros::ok && stop_all == false)
     {
         if (f == true)
         {
