@@ -3,7 +3,6 @@
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Accel.h>
-#define _USE_MATH_DEFINES
 #include <math.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -15,111 +14,44 @@
 using namespace cv;
 ros::Subscriber sub_bumper;
 ros::Publisher pub_twist;
-ros::Publisher pub_accl;
 
-int dist = 0, total_dist;
-bool flag = true, f = true;
-
-
-
-
-
-
+int length, width, length_stop = -99, width_stop = -99, first = 2;
+bool f = true, stop_all = false;
 
 void route_bot()
 {
- ros::Duration(1).sleep();
-        
-    if (total_dist == dist)
+    if (f == true)
     {
-        ROS_INFO("God ide Simon.");
+        f = false;
+        length = length -2;
+        length_stop = length;
+        length = 0;
+    }
 
-        dist = 0;
+    else if (f == false)
+    {
+        f = true;
+        width = width - 2;
+        width_stop = width;
+        width = 0;
+    }
+    
+    ros::Duration(1).sleep();
+    
+    for (int i = 0; i < 2; i++)
+    {
+        geometry_msgs::Twist msg;
+        msg.linear.x = 0;
+        msg.angular.z = 1.59;
+        pub_twist.publish(msg);
+        ros::Duration(0.5).sleep();
+        msg.linear.x = 0;
+        msg.angular.z = 0;
+        pub_twist.publish(msg);
+    }
 
-        if (flag)
-        {
-            for (int i = 0; i < 3; i++)
-            {        
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0;
-                msg.angular.z = 1.4;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-            }
-
-            ros::Duration(1).sleep();
-
-            for (int i = 0; i < 2; i++)
-            {
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0.5;
-                msg.angular.z = 0;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-            }
-
-            ros::Duration(1).sleep();
-
-            for (int i = 0; i < 3; i++)
-            {
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0;
-                msg.angular.z = 1.4;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-            }
-            
-            ros::Duration(1).sleep();
-            flag = !flag;
-        }
-        
-        else
-        {
-            ros::Duration(1).sleep();
-
-            for (int i = 0; i < 3; i++)
-            {        
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0;
-                msg.angular.z = -1.4;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-            }
-
-            ros::Duration(1).sleep();
-
-            for (int i = 0; i < 2; i++)
-            {
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0.5;
-                msg.angular.z = 0;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-            }
-
-            ros::Duration(1).sleep();
-
-            for (int i = 0; i < 3; i++)
-            {
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0;
-                msg.angular.z = -1.4;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-            }
-
-            ros::Duration(1).sleep();
-            flag = !flag;
-        }
-    }   
+        ros::Duration(1).sleep();
 }
-
-
-
-
-
-
-
 
 void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 {
@@ -130,118 +62,56 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
         
         if (msg->bumper < 3)
         {
-            ROS_INFO("Center bumper activated!");
-            if (f)
+            ROS_INFO("Bumper activated!");
+            
+            if (first != 0)
             {
-                f = !f;
-                dist = dist -6;
-                total_dist = dist;
-            }
+                first--;
 
-            dist = 0;
-
-            if (flag)
-            {
-                for (int i = 0; i < 2; i++)
+                if (f == true)
                 {
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = -0.3;
-                    msg.angular.z = 0;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
+                    ROS_INFO ("TRUE\n");
+                    f = false;
+                    length = length -3;
+                    length_stop = length;
                 }
 
-                ros::Duration(1).sleep();
-
-                for (int i = 0; i < 3; i++)
-                {        
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = 0;
-                    msg.angular.z = 1.5;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
-                    msg.linear.x = 0;
-                    msg.angular.z = 0;
-                    pub_twist.publish(msg);
-                }
-
-                ros::Duration(1).sleep();
-
-                for (int i = 0; i < 2; i++)
+                else if (f == false)
                 {
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = 0.5;
-                    msg.angular.z = 0;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
+                    ROS_INFO ("FALSE\n");
+                    f = true;
+                    width = width - 3;
+                    width_stop = width;
                 }
-
-                ros::Duration(1).sleep();
-
-                for (int i = 0; i < 3; i++)
-                {
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = 0;
-                    msg.angular.z = 1.5;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
-                    msg.linear.x = 0;
-                    msg.angular.z = 0;
-                    pub_twist.publish(msg);
-                }
-                
-                ros::Duration(1).sleep();
-                flag = !flag;
             }
             
-            else
+            length = 0;
+            width = 0;
+            
+            for (int i = 0; i < 1; i++)
             {
-                
-                for (int i = 0; i < 2; i++)
-                {
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = -0.3;
-                    msg.angular.z = 0;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
-                }
-
-                ros::Duration(1).sleep();
-
-                for (int i = 0; i < 3; i++)
-                {        
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = 0;
-                    msg.angular.z = -1.4;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
-                }
-
-                ros::Duration(1).sleep();
-
-                for (int i = 0; i < 2; i++)
-                {
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = 0.5;
-                    msg.angular.z = 0;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
-                }
-
-                ros::Duration(1).sleep();
-
-                for (int i = 0; i < 3; i++)
-                {
-                    geometry_msgs::Twist msg;
-                    msg.linear.x = 0;
-                    msg.angular.z = -1.4;
-                    pub_twist.publish(msg);
-                    ros::Duration(0.5).sleep();
-                }
-
-                ros::Duration(1).sleep();
-                flag = !flag;
+                geometry_msgs::Twist msg;
+                msg.linear.x = -0.3;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
             }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 2; i++)
+            {        
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = 1.59;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                msg.linear.x = 0;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+            }
+
+            ros::Duration(1).sleep();
         }
 
         else if (msg->bumper == 0)
@@ -255,7 +125,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
         {
             ROS_INFO("Right bumper activated!");
 
-            //indsæt right bumper resultat her        
+            //indsæt right bumper resultat her
         }
     }
 }
@@ -267,22 +137,80 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     sub_bumper = n.subscribe("/mobile_base/events/bumper", 1, clbk_bumper);
     pub_twist = n.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000);
-    pub_accl = n.advertise<geometry_msgs::Accel>("/cmd_vel_mux/input/teleop", 1000);
     
-    for (int ever = 1; ros::ok && ever > 0; ever++)
+    ros::Duration(3).sleep();
+
+    while (ros::ok)
     {
-        dist++;
+        if (f == true)
+        {
+            length++;
+        }
+
+        else if (f == false)
+        {
+            width++;
+        }
+
         geometry_msgs::Twist msg;
         msg.linear.x = 0.3;
-        msg.angular.z = 0;
+        msg.angular.z = 0.011;
         pub_twist.publish(msg);
-        std::cout << dist << " " << total_dist << std::endl;
-        ros::Duration(0.5).sleep();       
+        std::cout << length << "/" << length_stop << "   " << width << "/" << width_stop << std::endl;
+        ros::Duration(0.5).sleep();
         ros::spinOnce();
-        if (total_dist == dist)
+        
+        if (length_stop == length || width_stop == width)
         {
             std::cout << "For langt... STOP!!" << std::endl;
             route_bot();
+        }
+
+        if (length_stop < 1 && length_stop >-2)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                msg.linear.x = 0.00;
+                msg.angular.z = 1.57;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            while (width_stop != width)
+            {
+                msg.linear.x = 0.30;
+                msg.angular.z = 0.01;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                
+            }
+            
+            stop_all = true;
+        }
+
+        if (width_stop < 1 && width_stop >-2)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                msg.linear.x = 0.00;
+                msg.angular.z = 1.57;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            while (length_stop != length)
+            {
+                msg.linear.x = 0.3;
+                msg.angular.z = 0.01;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();  
+            }
+            
+            stop_all = true;
         }
     }
 
