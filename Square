@@ -1,0 +1,195 @@
+#include <ros/ros.h>
+#include <kobuki_msgs/BumperEvent.h>
+#include <sensor_msgs/Image.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Accel.h>
+#include <math.h>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+ros::Subscriber sub_bumper;
+ros::Publisher pub_twist;
+
+int length, width, length_stop = -99, width_stop = -99, first = 2;
+bool f = true, stop_all = false;
+
+void route_bot()
+{
+    if (f == true)
+    {
+        f = false;
+        length = length -2;
+        length_stop = length;
+        length = 0;
+    }
+
+    else if (f == false)
+    {
+        f = true;
+        width = width - 2;
+        width_stop = width;
+        width = 0;
+    }
+    
+    ros::Duration(1).sleep();
+    
+    for (int i = 0; i < 2; i++)
+    {
+        geometry_msgs::Twist msg;
+        msg.linear.x = 0;
+        msg.angular.z = 1.6;
+        pub_twist.publish(msg);
+        ros::Duration(0.5).sleep();
+        msg.linear.x = 0;
+        msg.angular.z = 0;
+        pub_twist.publish(msg);
+    }
+
+        ros::Duration(1).sleep();
+}
+
+void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
+{
+    ROS_INFO ("Detter er clbk_bumper");
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED)
+    {
+        ros::Duration(1).sleep();
+        
+        if (msg->bumper < 3)
+        {
+            ROS_INFO("Bumper activated!");
+            
+            if (first != 0)
+            {
+                first--;
+
+                if (f == true)
+                {
+                    ROS_INFO ("TRUE\n");
+                    f = false;
+                    length = length -3;
+                    length_stop = length;
+                }
+
+                else if (f == false)
+                {
+                    ROS_INFO ("FALSE\n");
+                    f = true;
+                    width = width - 3;
+                    width_stop = width;
+                }
+            }
+            
+            length = 0;
+            width = 0;
+            
+            for (int i = 0; i < 1; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = -0.3;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 2; i++)
+            {        
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0;
+                msg.angular.z = 1.6;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                msg.linear.x = 0;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+            }
+
+            ros::Duration(1).sleep();
+        }
+
+        else if (msg->bumper == 0)
+        {
+            ROS_INFO("Left bumper activated!");
+
+            //indsæt left bumper resultat her
+        }
+    
+        else if (msg->bumper == 2)
+        {
+            ROS_INFO("Right bumper activated!");
+
+            //indsæt right bumper resultat her
+        }
+    }
+}
+
+
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "Hello World");
+    ros::NodeHandle n;
+    sub_bumper = n.subscribe("/mobile_base/events/bumper", 1, clbk_bumper);
+    pub_twist = n.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000);
+    
+    ros::Duration(3).sleep();
+
+    while (ros::ok)
+    {
+        if (f == true)
+        {
+            length++;
+        }
+
+        else if (f == false)
+        {
+            width++;
+        }
+
+        geometry_msgs::Twist msg;
+        msg.linear.x = 0.3;
+        msg.angular.z = 0.01;
+        pub_twist.publish(msg);
+        std::cout << length << "/" << length_stop << "   " << width << "/" << width_stop << std::endl;
+        ros::Duration(0.5).sleep();
+        ros::spinOnce();
+        
+        if (length_stop == length || width_stop == width)
+        {
+            std::cout << "For langt... STOP!!" << std::endl;
+            route_bot();
+        }
+
+        if (length_stop < 1 && length_stop >-2)
+        {
+            while (width_stop != width)
+            {
+                msg.linear.x = 0.3;
+                msg.angular.z = 0.01;
+                pub_twist.publish(msg);
+            }
+            
+            stop_all = true;
+        }
+
+        if (width_stop < 1 && width_stop >-2)
+        {
+            while (length_stop != length)
+            {
+                msg.linear.x = 0.3;
+                msg.angular.z = 0.01;
+                pub_twist.publish(msg);  
+            }
+            
+            stop_all = true;
+        }
+    }
+
+    return 0;
+}
