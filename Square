@@ -42,7 +42,7 @@ void route_bot()
     {
         geometry_msgs::Twist msg;
         msg.linear.x = 0;
-        msg.angular.z = 1.6;
+        msg.angular.z = 1.59;
         pub_twist.publish(msg);
         ros::Duration(0.5).sleep();
         msg.linear.x = 0;
@@ -103,7 +103,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
             {        
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = 1.6;
+                msg.angular.z = 1.59;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
                 msg.linear.x = 0;
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     
     ros::Duration(3).sleep();
 
-    while (ros::ok)
+    while (ros::ok && stop_all == false)
     {
         if (f == true)
         {
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 
         geometry_msgs::Twist msg;
         msg.linear.x = 0.3;
-        msg.angular.z = 0.01;
+        msg.angular.z = 0.011;
         pub_twist.publish(msg);
         std::cout << length << "/" << length_stop << "   " << width << "/" << width_stop << std::endl;
         ros::Duration(0.5).sleep();
@@ -168,11 +168,26 @@ int main(int argc, char **argv)
 
         if (length_stop < 1 && length_stop >-2)
         {
+            for (int i = 0; i < 2; i++)
+            {
+                msg.linear.x = 0.00;
+                msg.angular.z = 1.57;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
+            }
+
+            ros::Duration(1).sleep();
+
             while (width_stop != width)
             {
-                msg.linear.x = 0.3;
+                msg.linear.x = 0.30;
                 msg.angular.z = 0.01;
                 pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                
             }
             
             stop_all = true;
@@ -180,11 +195,25 @@ int main(int argc, char **argv)
 
         if (width_stop < 1 && width_stop >-2)
         {
+            for (int i = 0; i < 2; i++)
+            {
+                msg.linear.x = 0.00;
+                msg.angular.z = 1.57;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
+            }
+
+            ros::Duration(1).sleep();
+
             while (length_stop != length)
             {
                 msg.linear.x = 0.3;
                 msg.angular.z = 0.01;
-                pub_twist.publish(msg);  
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();  
             }
             
             stop_all = true;
