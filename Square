@@ -168,34 +168,14 @@ int main(int argc, char **argv)
 
         if (length_stop < 1 && length_stop >-2)
         {
-            for (int i = 0; i < 2; i++)
-            {
-                msg.linear.x = 0.00;
-                msg.angular.z = 1.57;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-                msg.linear.x = 0.00;
-                msg.angular.z = 0.00;
-                pub_twist.publish(msg);
-            }
-            
             stop_all = true;
+            std::cout << "Så går turen ikke længere." << std::endl;
         }
 
         if (width_stop < 1 && width_stop >-2)
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                msg.linear.x = 0.00;
-                msg.angular.z = 1.57;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-                msg.linear.x = 0.00;
-                msg.angular.z = 0.00;
-                pub_twist.publish(msg);
-            }
-            
+        {  
             stop_all = true;
+            std::cout << "Så går turen ikke længere." << std::endl;
         }
     }
 
