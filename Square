@@ -178,17 +178,6 @@ int main(int argc, char **argv)
                 msg.angular.z = 0.00;
                 pub_twist.publish(msg);
             }
-
-            ros::Duration(1).sleep();
-
-            while (width_stop != width)
-            {
-                msg.linear.x = 0.30;
-                msg.angular.z = 0.01;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-                
-            }
             
             stop_all = true;
         }
@@ -204,16 +193,6 @@ int main(int argc, char **argv)
                 msg.linear.x = 0.00;
                 msg.angular.z = 0.00;
                 pub_twist.publish(msg);
-            }
-
-            ros::Duration(1).sleep();
-
-            while (length_stop != length)
-            {
-                msg.linear.x = 0.3;
-                msg.angular.z = 0.01;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();  
             }
             
             stop_all = true;
