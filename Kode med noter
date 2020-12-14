@@ -1,4 +1,4 @@
-//Header filer
+#include <iostream>
 #include <ros/ros.h>
 #include <kobuki_msgs/BumperEvent.h>
 #include <sensor_msgs/Image.h>
@@ -12,93 +12,82 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
-//Easy acces to cv libary 
 using namespace cv;
-
-//Hvad er det helt præcist?
 ros::Subscriber sub_bumper;
 ros::Publisher pub_twist;
 
-//variabler til bestemmelse af ruten
-int dist = 0, total_dist;
-//Variabler til at initiere dele af konden under særlige kriterier.
-bool flag = true, f = true;
+int dist = 0, total_dist = 0, the_end = 0;
+bool flag = true, f = true, stop_all = false, second = false;
 
 
-
-
-
-
-//Funktion bliver kaldt i main af spinOnce
 void route_bot()
 {
- ros::Duration(1).sleep();
-    
-    //lader robotten dreje før den kolider med vægen.
     if (total_dist == dist)
     {
-        //Nulstiller distance som robotten har tilbagelagt.
         dist = 0;
-        
-        //Denne kode eksikveres når robotten starter på langsiden i samme retning som den startede
+        ros::Duration(1).sleep();
+
         if (flag)
         {
-            //dette for loop gentager lader robotten dreje 1,4 radianer pr/s i et halvt sekundt 3 gang
-            for (int i = 0; i < 3; i++)
-            {
-                //her bruges Twist til at lave en besked som robotten kan forstå.
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0;
-                msg.angular.z = 1.4;
-                //Her bliver robotten informeret om hvad den skal
-                pub_twist.publish(msg);
-                //Her venter vi med at publish
-                ros::Duration(0.5).sleep();
-            }
-
-            //Her venter den med at eksikvere næste komando så den acelleration bliver nulstillet mellem hver nye komando.
-            ros::Duration(1).sleep();
-
-            //Dette for loop får robotten til at bevæge sig 0.5 m/s frem 2 gange med en varighed af 0.5 sekunder.
             for (int i = 0; i < 2; i++)
             {
-                //Samme som før
                 geometry_msgs::Twist msg;
-                msg.linear.x = 0.5;
-                msg.angular.z = 0;
+                msg.linear.x = 0;
+                msg.angular.z = 1.60;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
+
             }
 
             ros::Duration(1).sleep();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0.5;
+                msg.angular.z = 0.011;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 2; i++)
             {
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = 1.4;
+                msg.angular.z = 1.60;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
             }
-            
+
             ros::Duration(1).sleep();
-            //Dikter at når denne kode lige har kørt skal det være den anden som kører næste gang.
             flag = !flag;
         }
-        
-        //dette eksikveres hvis robotten er på tilbagevejen eks fra sin første tur frem.
+
         else
         {
             ros::Duration(1).sleep();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {        
-                //Her drejer robotten den modsatte vej om sig egen akse for at skabe siksak møsnteret.
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = -1.4;
+                msg.angular.z = -1.60;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
             }
 
             ros::Duration(1).sleep();
@@ -107,81 +96,82 @@ void route_bot()
             {
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0.5;
-                msg.angular.z = 0;
+                msg.angular.z = 0.011;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
             }
 
             ros::Duration(1).sleep();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = -1.4;
+                msg.angular.z = -1.60;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
+                msg.linear.x = 0.00;
+                msg.angular.z = 0.00;
+                pub_twist.publish(msg);
             }
 
             ros::Duration(1).sleep();
-            //Dette fortæller at næste gang "route_bot" bliver eksikveret så skal den anden del af koden eksikveres.
             flag = !flag;
         }
     }   
 }
 
 
-
-
-
-
-
-//funktion ved navn "clbk_bumper" som initieres ved sensor input fra robotten, bliver kaldt fra main (call back).
 void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 {
-    //at den kun reager på sensor inputtet ved at den bliver presset ind. ellers ville den eksikvere koden 2 gang, en for pressed og en for released.
+    ROS_INFO ("Detter er clbk_bumper");
     if (msg->state == kobuki_msgs::BumperEvent::PRESSED)
     {
         ros::Duration(1).sleep();
         
-        //Der er 3 bumper sensor "kanaler" som refereres til som 0, 1 og 2. her reager den på alle 3
         if (msg->bumper < 3)
         {
             ROS_INFO("Bumper activated!");
-            //køres kun igenne første gang og sætter distancen hvor efter robotten skal dreje så den ikke kollider med vægen igen.
-            if (f)
+
+            the_end++;
+
+            if (f == true)
             {
                 f = !f;
-                dist = dist -6;
+                dist = dist -2;
                 total_dist = dist;
             }
 
-            //Her nulstilles den tilbagelagte distance.
             dist = 0;
 
-            //Det samme fra før, men dette den sekvens som vil blive eksikveret ved første kollision.
             if (flag)
             {
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = -0.3;
-                    msg.angular.z = 0;
+                    msg.angular.z = 0.011;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
+                    pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {        
                     geometry_msgs::Twist msg;
-                    msg.linear.x = 0;
-                    msg.angular.z = 1.5;
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 1.60;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0;
-                    msg.angular.z = 0;
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
                     pub_twist.publish(msg);
                 }
 
@@ -191,51 +181,58 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0.5;
-                    msg.angular.z = 0;
+                    msg.angular.z = 0.011;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
+                    pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = 1.5;
+                    msg.angular.z = 1.60;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
                     msg.linear.x = 0;
                     msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
-                
+
                 ros::Duration(1).sleep();
                 flag = !flag;
             }
-            
-            //denne sekvens af koden vil kun blive eksikveret hvis der er sket en fejl og robotten kollideret før den havde nået den "planlagte" distance.
+
             else
             {
-                
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = -0.3;
-                    msg.angular.z = 0;
+                    msg.angular.z = 0.011;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
+                    pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {        
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = -1.4;
+                    msg.angular.z = -1.60;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
+                    pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
@@ -244,20 +241,27 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0.5;
-                    msg.angular.z = 0;
+                    msg.angular.z = 0.011;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
+                    pub_twist.publish(msg);
                 }
 
+                ros::spinOnce;
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0;
-                    msg.angular.z = -1.4;
+                    msg.angular.z = -1.60;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
+                    msg.linear.x = 0.00;
+                    msg.angular.z = 0.00;
+                    pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
@@ -265,14 +269,13 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
             }
         }
 
-        //Dette kunne bruges til at undvige forhindringer elle rette op efter, men indtil videre bliver de ikke brugt.
         else if (msg->bumper == 0)
         {
             ROS_INFO("Left bumper activated!");
 
             //indsæt left bumper resultat her
         }
-    
+
         else if (msg->bumper == 2)
         {
             ROS_INFO("Right bumper activated!");
@@ -282,42 +285,42 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
     }
 }
 
-//det er her koden rent faktisk kører.
+
 int main(int argc, char **argv)
 {
-    //Dette er oprettelse af det "topic" som main'en her kan publish i.
     ros::init(argc, argv, "Creeping line");
-    //Undersøg
     ros::NodeHandle n;
-    //oprettelse af sti til at subscribe fra topic'en "bumper".
     sub_bumper = n.subscribe("/mobile_base/events/bumper", 1, clbk_bumper);
-    //oprettelse af sti til at publish i topic'en "teleop".
     pub_twist = n.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000);
-    
-    //Et while loop som kører så længe ros kører. Det er her robotten kører før den kollider eller drejer af sig selv.
-    while (ros::ok)
+
+    ros::Duration(3).sleep();
+
+    while (ros::ok && stop_all != true)
     {
-        //til tælder antal repetationer den har har nået under vejs.
         dist++;
-        //beskrevet tidligere.
         geometry_msgs::Twist msg;
         msg.linear.x = 0.3;
-        msg.angular.z = 0;
+        msg.angular.z = 0.011;
         pub_twist.publish(msg);
-        //fortæller hvad den har kørt og hvor mange den skal nå før den drejer uden at få sensor input.
+        ros::Duration(0.5).sleep();
+        msg.linear.x = 0.00;
+        msg.angular.z = 0.00;
+        pub_twist.publish(msg);
         std::cout << dist << " " << total_dist << std::endl;
-        ros::Duration(0.5).sleep();       
-        //denne går ud af loopet og lader all "call back" funktionerne køre igennem før koden går tilbage her til og fortæstter.
         ros::spinOnce();
-        //Hvis den aktuelle distance er tilsvarende den oprindelige distance minus lidt er lig hinanden så initieres denne del af koden.
+        second = false;
+
         if (total_dist == dist)
         {
             std::cout << "For langt... STOP!!" << std::endl;
-            //Her bliver funktionen "route_bot" aktiveret
             route_bot();
+        }
+
+        if (the_end > 1)
+        {
+            stop_all = true;
         }
     }
 
-    //her når koden ikke til.
     return 0;
 }
