@@ -16,7 +16,7 @@ ros::Subscriber sub_bumper;
 ros::Publisher pub_twist;
 
 int length, width, length_stop = -99, width_stop = -99, first = 2;
-float Turn_angle = 1.13;
+float turn_angle = 1.13;
 bool f = true, stop_all = false;
 
 void route_bot()
@@ -43,7 +43,7 @@ void route_bot()
     {
         geometry_msgs::Twist msg;
         msg.linear.x = 0;
-        msg.angular.z = Turn_angle;
+        msg.angular.z = turn_angle;
         pub_twist.publish(msg);
         ros::Duration(0.5).sleep();
         msg.linear.x = 0;
@@ -104,7 +104,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
             {        
                 geometry_msgs::Twist msg;
                 msg.linear.x = 0;
-                msg.angular.z = Turn_angle;
+                msg.angular.z = turn_angle;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
                 msg.linear.x = 0;
@@ -134,7 +134,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "Hello World");
+    ros::init(argc, argv, "Square");
     ros::NodeHandle n;
     sub_bumper = n.subscribe("/mobile_base/events/bumper", 1, clbk_bumper);
     pub_twist = n.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000);
@@ -155,25 +155,25 @@ int main(int argc, char **argv)
 
         geometry_msgs::Twist msg;
         msg.linear.x = 0.3;
-        msg.angular.z = 0.0;
+        msg.angular.z = 0;
         pub_twist.publish(msg);
         std::cout << length << "/" << length_stop << "   " << width << "/" << width_stop << std::endl;
         ros::Duration(0.5).sleep();
         ros::spinOnce();
-
+        
         if (length_stop == length || width_stop == width)
         {
             std::cout << "For langt... STOP!!" << std::endl;
             route_bot();
         }
 
-        if (length_stop < 1 && length_stop >-2)
+        if (length_stop <= 1 && length_stop > -2)
         {
             stop_all = true;
             std::cout << "Så går turen ikke længere." << std::endl;
         }
 
-        if (width_stop < 1 && width_stop >-2)
+        if (width_stop <= 1 && width_stop > -2)
         {  
             stop_all = true;
             std::cout << "Så går turen ikke længere." << std::endl;
