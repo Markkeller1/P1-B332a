@@ -17,7 +17,7 @@ ros::Subscriber sub_bumper;
 ros::Publisher pub_twist;
 
 int dist = 0, total_dist = 0, the_end = 0;
-Turn_angle = 1.13;
+float turn_angle = 1.13;
 bool flag = true, f = true, stop_all = false, second = false;
 
 
@@ -30,11 +30,11 @@ void route_bot()
 
         if (flag)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 geometry_msgs::Twist msg;
-                msg.linear.x = 0.00;
-                msg.angular.z = Turn_angle;
+                msg.linear.x = 0;
+                msg.angular.z = turn_angle;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
                 msg.linear.x = 0.00;
@@ -48,26 +48,26 @@ void route_bot()
             for (int i = 0; i < 2; i++)
             {
                 geometry_msgs::Twist msg;
-                msg.linear.x = 0.5;
-                msg.angular.z = 0.00;
+                msg.linear.x = 0.3;
+                msg.angular.z = 0;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
-                msg.linear.x = 0.00;
-                msg.angular.z = 0.00;
+                msg.linear.x = 0;
+                msg.angular.z = 0;
                 pub_twist.publish(msg);
             }
 
             ros::Duration(1).sleep();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 geometry_msgs::Twist msg;
-                msg.linear.x = 0.00;
-                msg.angular.z = Turn_angle;
+                msg.linear.x = 0;
+                msg.angular.z = turn_angle;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
-                msg.linear.x = 0.00;
-                msg.angular.z = 0.00;
+                msg.linear.x = 0;
+                msg.angular.z = 0;
                 pub_twist.publish(msg);
             }
 
@@ -79,11 +79,25 @@ void route_bot()
         {
             ros::Duration(1).sleep();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {        
                 geometry_msgs::Twist msg;
-                msg.linear.x = 0.00;
-                msg.angular.z = -Turn_angle;
+                msg.linear.x = 0;
+                msg.angular.z = -turn_angle;
+                pub_twist.publish(msg);
+                ros::Duration(0.5).sleep();
+                msg.linear.x = 0;
+                msg.angular.z = 0;
+                pub_twist.publish(msg);
+            }
+
+            ros::Duration(1).sleep();
+
+            for (int i = 0; i < 2; i++)
+            {
+                geometry_msgs::Twist msg;
+                msg.linear.x = 0.3;
+                msg.angular.z = 0;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
                 msg.linear.x = 0.00;
@@ -93,29 +107,15 @@ void route_bot()
 
             ros::Duration(1).sleep();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 geometry_msgs::Twist msg;
-                msg.linear.x = 0.5;
-                msg.angular.z = 0.00;
+                msg.linear.x = 0;
+                msg.angular.z = -turn_angle;
                 pub_twist.publish(msg);
                 ros::Duration(0.5).sleep();
-                msg.linear.x = 0.00;
-                msg.angular.z = 0.00;
-                pub_twist.publish(msg);
-            }
-
-            ros::Duration(1).sleep();
-
-            for (int i = 0; i < 2; i++)
-            {
-                geometry_msgs::Twist msg;
-                msg.linear.x = 0.00;
-                msg.angular.z = -Turn_angle;
-                pub_twist.publish(msg);
-                ros::Duration(0.5).sleep();
-                msg.linear.x = 0.00;
-                msg.angular.z = 0.00;
+                msg.linear.x = 0;
+                msg.angular.z = 0;
                 pub_twist.publish(msg);
             }
 
@@ -154,25 +154,25 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = -0.3;
-                    msg.angular.z = 0.00;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 4; i++)
                 {        
                     geometry_msgs::Twist msg;
-                    msg.linear.x = 0.00;
-                    msg.angular.z = Turn_angle;
+                    msg.linear.x = 0;
+                    msg.angular.z = turn_angle;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
@@ -181,26 +181,26 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 for (int i = 0; i < 2; i++)
                 {
                     geometry_msgs::Twist msg;
-                    msg.linear.x = 0.5;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0.3;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     geometry_msgs::Twist msg;
-                    msg.linear.x = 0.00;
-                    msg.angular.z = Turn_angle;
+                    msg.linear.x = 0;
+                    msg.angular.z = turn_angle;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
@@ -214,11 +214,11 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = -0.3;
-                    msg.angular.z = 0.00;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
@@ -227,12 +227,12 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 for (int i = 0; i < 2; i++)
                 {        
                     geometry_msgs::Twist msg;
-                    msg.linear.x = 0.00;
-                    msg.angular.z = -Turn_angle;
+                    msg.linear.x = 0;
+                    msg.angular.z = -turn_angle;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
@@ -242,26 +242,26 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     geometry_msgs::Twist msg;
                     msg.linear.x = 0.5;
-                    msg.angular.z = 0.00;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
                 ros::spinOnce;
                 ros::Duration(1).sleep();
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     geometry_msgs::Twist msg;
-                    msg.linear.x = 0.00;
-                    msg.angular.z = -Turn_angle;
+                    msg.linear.x = 0;
+                    msg.angular.z = -turn_angle;
                     pub_twist.publish(msg);
                     ros::Duration(0.5).sleep();
-                    msg.linear.x = 0.00;
-                    msg.angular.z = 0.00;
+                    msg.linear.x = 0;
+                    msg.angular.z = 0;
                     pub_twist.publish(msg);
                 }
 
@@ -301,17 +301,17 @@ int main(int argc, char **argv)
         dist++;
         geometry_msgs::Twist msg;
         msg.linear.x = 0.3;
-        msg.angular.z = 0.00;
+        msg.angular.z = 0;
         pub_twist.publish(msg);
         ros::Duration(0.5).sleep();
-        msg.linear.x = 0.00;
-        msg.angular.z = 0.00;
+        msg.linear.x = 0;
+        msg.angular.z = 0;
         pub_twist.publish(msg);
         std::cout << dist << " " << total_dist << std::endl;
         ros::spinOnce();
         second = false;
 
-        if (total_dist == dist)
+        if (total_dist == dist && the_end <= 1)
         {
             std::cout << "For langt... STOP!!" << std::endl;
             route_bot();
