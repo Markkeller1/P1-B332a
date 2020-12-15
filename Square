@@ -73,7 +73,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     ROS_INFO ("TRUE\n");
                     f = false;
-                    length = length -3;
+                    length = length -2;
                     length_stop = length;
                 }
 
@@ -81,7 +81,7 @@ void clbk_bumper(const kobuki_msgs::BumperEvent::ConstPtr& msg)
                 {
                     ROS_INFO ("FALSE\n");
                     f = true;
-                    width = width - 3;
+                    width = width - 2;
                     width_stop = width;
                 }
             }
